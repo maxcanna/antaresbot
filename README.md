@@ -1,5 +1,5 @@
 ![](http://antaresristorante.it/images/antares.png)
-# antaresbot
+# antaresbot [![Build Status](https://travis-ci.org/maxcanna/antaresbot.svg?branch=master)](https://travis-ci.org/maxcanna/antaresbot)
 Post daily menu to chats
 
 ## How do I get set up?
