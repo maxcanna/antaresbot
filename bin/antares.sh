@@ -1,6 +1,5 @@
 #!/bin/bash
 
-HIPCHAT_URL=https://$HIPCHAT_ORG_NAME.hipchat.com/v2/room/$HIPCHAT_ROOM_ID/notification
 
 DATE=$(date "+%d_%m_%Y")
 FILENAME="menu_pranzo_${DATE}_16_00.pdf"
