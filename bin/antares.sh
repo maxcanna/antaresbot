@@ -17,13 +17,14 @@ main() {
         TEXT=$(curl -s http://pdftotext.com/files/$FOLDER/$JOB_ID/"${FILENAME%.*}.txt")
         TEXT=$(echo -en $TEXT | sed -e 's/[[:space:]]*$//;s/^.*PASTA AL POMODORO.//g;s/ € *[0-9]*[0-9],*\.*[0-9][0-9]//g;s/\. */<br>/g')
         rm $FILENAME
-
-        echo '{
-                "color": "green",
-                "message": "<a href=\"'$URL'\"><img src=\"'$LOGO'\"><br><br>Menu '$RESTAURANT' del <b>'${DATE//_/-}'</b></a><br><br>'$TEXT'",
-                "notify": true,
-                "message_format": "html"
-        }' | curl -k -X POST $HIPCHAT_URL -H "authorization:Bearer ${HIPCHAT_TOKEN}" -H content-type:application/json -d @-
+		if [ -n "$HIPCHAT_URL" ]; then
+			echo '{
+					"color": "green",
+					"message": "<a href=\"'$URL'\"><img src=\"'$LOGO'\"><br><br>Menu '$RESTAURANT' del <b>'${DATE//_/-}'</b></a><br><br>'$TEXT'",
+					"notify": true,
+					"message_format": "html"
+			}' | curl -k -X POST $HIPCHAT_URL -H "authorization:Bearer ${HIPCHAT_TOKEN}" -H content-type:application/json -d @-
+		fi
 }
 
 PDF="http://www.cityliferistorante.it/upload/$FILENAME"
