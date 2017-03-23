@@ -27,7 +27,7 @@ main() {
 					"message": "<a href=\"'$URL'\"><img src=\"'$LOGO'\"><br><br>Menu '$RESTAURANT' del <b>'${DATE//_/-}'</b></a><br><br>'$TEXT'",
 					"notify": true,
 					"message_format": "html"
-			}' | curl -k -X POST $HIPCHAT_URL -H "authorization:Bearer ${HIPCHAT_TOKEN}" -H content-type:application/json -d @-
+			}' | curl -k -X POST $HIPCHAT_URL -H content-type:application/json -d @-
 		fi
 		if [ -n "$SLACK_URL" ]; then
 			echo '{
