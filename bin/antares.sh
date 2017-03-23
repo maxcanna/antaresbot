@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 DATE=$(date "+%d_%m_%Y")
 FILENAME="menu_pranzo_${DATE}_16_00.pdf"
 FOLDER=8haeeqygx59lzbsn
@@ -21,6 +20,7 @@ main() {
         TEXT=$(curl -s http://pdftotext.com/files/$FOLDER/$JOB_ID/"${FILENAME%.*}.txt")
         TEXT=$(echo -en $TEXT | sed -e 's/[[:space:]]*$//;s/^.*PASTA AL POMODORO.//g;s/ € *[0-9]*[0-9],*\.*[0-9][0-9]//g;s/\. */<br>/g')
         rm $FILENAME
+
 		if [ -n "$HIPCHAT_URL" ]; then
 			echo '{
 					"color": "green",
@@ -28,6 +28,22 @@ main() {
 					"notify": true,
 					"message_format": "html"
 			}' | curl -k -X POST $HIPCHAT_URL -H "authorization:Bearer ${HIPCHAT_TOKEN}" -H content-type:application/json -d @-
+		fi
+		if [ -n "$SLACK_URL" ]; then
+			echo '{
+						"attachments": [
+							{
+									"text": "'${TEXT//<br>/\\n}'",
+									"fallback": "Menu del '${DATE//_/-}'",
+									"title": "Menu del '${DATE//_/-}'",
+									"title_link": "'$URL'",
+									"color": "good",
+									"thumb_url": "'$LOGO'",
+									"author_icon": "'$LOGO'",
+									"author_name": "'$RESTAURANT'"
+							}
+						]
+			}' | curl -k -X POST $SLACK_URL -H content-type:application/json -d @-
 		fi
 }
 
