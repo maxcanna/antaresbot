@@ -10,8 +10,8 @@ main() {
     JOB_ID=$(openssl rand -hex 5)
 
     curl -sSLO $PDF > /dev/null
-    if [ -z $(file $FILENAME | grep "PDF document") ]; then
-        TEXT="Not found!"
+    if [ -z "$(file $FILENAME | grep "PDF document")" ]; then
+        TEXT="Non disponibile"
 	else
         curl -sS http://pdftotext.com/upload/$FOLDER -F "file=@${FILENAME};type=application/pdf" -F id=$JOB_ID > /dev/null
         curl -sS http://pdftotext.com/convert/$FOLDER/$JOB_ID?rnd=0.16389987427930808 > /dev/null
