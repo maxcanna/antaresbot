@@ -45,6 +45,15 @@ main() {
                 ]
         }' | curl -k -X POST $SLACK_URL -H content-type:application/json -d @-
     fi
+    if [ -n "$PUSHBULLET_TOKEN" ]; then
+        echo '{
+              "type": "link",
+              "body": "'${TEXT//<br>/\\n}'",
+              "title":"Menu '$RESTAURANT' del '${DATE//_/-}'",
+              "url":"'$URL'",
+              "channel_tag": "antares"
+        }' | curl -X POST https://api.pushbullet.com/v2/pushes -H access-token:$PUSHBULLET_TOKEN -H content-type:application/json -d @-
+    fi
 }
 
 PDF="http://www.cityliferistorante.it/upload/$FILENAME"
