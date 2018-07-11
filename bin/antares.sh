@@ -14,10 +14,10 @@ main() {
         TEXT="Non disponibile"
         URL=""
 	else
-        curl -sS http://pdftotext.com/upload/$FOLDER -F "file=@${FILENAME};type=application/pdf" -F id=$JOB_ID > /dev/null
-        curl -sS http://pdftotext.com/convert/$FOLDER/$JOB_ID?rnd=0.16389987427930808 > /dev/null
+        curl -sS https://pdftotext.com/upload/$FOLDER -F "file=@${FILENAME};type=application/pdf" -F id=$JOB_ID > /dev/null
+        curl -sS https://pdftotext.com/convert/$FOLDER/$JOB_ID?rnd=0.16389987427930808 > /dev/null
         sleep 2s
-        TEXT=$(curl -s http://pdftotext.com/files/$FOLDER/$JOB_ID/"${FILENAME%.*}.txt")
+        TEXT=$(curl -s https://pdftotext.com/files/$FOLDER/$JOB_ID/"${FILENAME%.*}.txt")
         TEXT=$(echo -en $TEXT | sed -e 's/[[:space:]]*$//;s/^.*PASTA AL POMODORO.//g;s/ € *[0-9]*[0-9],*\.*[0-9][0-9]//g;s/\. */<br>/g')
     fi
     rm $FILENAME
