@@ -18,5 +18,5 @@
   },
   "repository": "git@github.com:maxcanna/antaresbot.git",
   "author": "Massimiliano Cannarozzo <massi@massi.ws>",
-  "license": "GPL-3.0"
+  "license": "MIT"
 }
