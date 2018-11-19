@@ -175,6 +175,7 @@ const getMenu = restaurant => {
             .filter(row => row.match(/RISO.*INGLESE.*/) === null)
             .join('\n')
             .replace(/€.*/, '')
+            .replace(/\.\n/g, '\n')
         )
         .then(text => Promise.all([
             sendHipchat(restaurant, text),
