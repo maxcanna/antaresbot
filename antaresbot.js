@@ -173,6 +173,7 @@ const getMenu = restaurant => {
             .filter(row => row.match(/UNICO.*/) === null)
             .filter(row => row.match(/BIS.*/) === null)
             .filter(row => row.match(/RISO.*INGLESE.*/) === null)
+            .map(row => `${row[0]}${row.slice(1).toLowerCase()}`)
             .join('\n')
             .replace(/€.*/, '')
             .replace(/\.\n/g, '\n')
