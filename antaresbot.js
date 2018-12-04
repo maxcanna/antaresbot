@@ -44,7 +44,7 @@ const getRestaurantLogo = restaurant => RESTAURANT_PARAMETERS[restaurant]['logo'
 const getRestaurantFileUrl = restaurant => `${RESTAURANT_PARAMETERS[restaurant]['pdfUrl']}${getFilename()}.pdf`;
 const getShareUrl = pdfUrl => `https://docs.google.com/viewerng/viewer?url=${pdfUrl}&usp=sharing`;
 
-const sendHipchat = (restaurant, text) => {
+const sendHipchat = (restaurant, text, error = false) => {
     const { env: { HIPCHAT_URL } } = process;
     const PDF_URL = getRestaurantFileUrl(restaurant);
     const NAME = getRestaurantName(restaurant);
@@ -55,7 +55,7 @@ const sendHipchat = (restaurant, text) => {
     return HIPCHAT_URL
         ? requestMessages.post(HIPCHAT_URL, {
             body: {
-                color: 'green',
+                color: error ? 'red' : 'green',
                 message: `<a href=${SHARE_URL}><img src=${LOGO}><br><br>Menu ${NAME} del <b>${HUMAN_DATE}</b></a><br><br>${text.replace('\n', '<br>')}`,
                 notify: true,
                 message_format: 'html',
@@ -64,7 +64,7 @@ const sendHipchat = (restaurant, text) => {
         : Promise.resolve();
 };
 
-const sendSlack = (restaurant, text) => {
+const sendSlack = (restaurant, text, error = false) => {
     const { env: { SLACK_URL } } = process;
     const PDF_URL = getRestaurantFileUrl(restaurant);
     const NAME = getRestaurantName(restaurant);
@@ -83,7 +83,7 @@ const sendSlack = (restaurant, text) => {
                         fallback: `Menu del ${HUMAN_DATE}`,
                         title: `Menu del ${HUMAN_DATE}`,
                         title_link: SHARE_URL,
-                        color: 'good',
+                        color: error ? 'danger' : ' good',
                         thumb_url: LOGO,
                         author_icon: LOGO,
                         author_name: NAME,
@@ -94,7 +94,7 @@ const sendSlack = (restaurant, text) => {
         : Promise.resolve();
 };
 
-const sendPushbullet = (restaurant, text) => {
+const sendPushbullet = (restaurant, text, error = false) => {
     const { env: { PUSHBULLET_TOKEN } } = process;
     const PDF_URL = getRestaurantFileUrl(restaurant);
     const NAME = getRestaurantName(restaurant);
@@ -182,6 +182,11 @@ const getMenu = restaurant => {
             sendHipchat(restaurant, text),
             sendSlack(restaurant, text),
             sendPushbullet(restaurant, text),
+        ]))
+        .catch(e => Promise.all([
+            sendHipchat(restaurant, e.message, true),
+            sendSlack(restaurant, e.message, true),
+            sendPushbullet(restaurant, e.message, true),
         ]));
 };
 
@@ -191,6 +196,6 @@ module.exports = (context, cb) => {
         ...context.secrets,
     };
     return Promise.all([RESTAURANT_ANTARES, RESTAURANT_CITY_LIFE].map(getMenu))
-        .then(() => cb(null, 'ok'))
+        .then(data => cb(null, data))
         .catch(cb);
 };
