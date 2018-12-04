@@ -11,7 +11,7 @@ const requestRestaurant = require('request').defaults({ encoding: null });
 const fileType = require('file-type');
 
 const now = new Date();
-const DATE = `${now.getDate()}_${now.getMonth()+1}_${now.getFullYear()}`;
+const DATE = `${('0'+now.getDate()).slice(-2)}_${(('0'+(now.getMonth()+1)).slice(-2))}_${now.getFullYear()}`;
 
 const RESTAURANT_PARAMETERS = {
     [RESTAURANT_CITY_LIFE]: {
@@ -83,7 +83,7 @@ const sendSlack = (restaurant, text, error = false) => {
                         fallback: `Menu del ${HUMAN_DATE}`,
                         title: `Menu del ${HUMAN_DATE}`,
                         title_link: SHARE_URL,
-                        color: error ? 'danger' : ' good',
+                        color: error ? 'danger' : 'good',
                         thumb_url: LOGO,
                         author_icon: LOGO,
                         author_name: NAME,
