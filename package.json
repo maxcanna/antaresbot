@@ -17,6 +17,6 @@
     "request-promise-native": "^1.0.5"
   },
   "repository": "git@github.com:maxcanna/antaresbot.git",
-  "author": "Massimiliano Cannarozzo <massi@massi.ws>",
+  "author": "Massimiliano Cannarozzo <massi@massi.dev>",
   "license": "MIT"
 }
