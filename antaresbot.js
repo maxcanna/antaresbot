@@ -195,7 +195,7 @@ module.exports = (context, cb) => {
         ...process.env,
         ...context.secrets,
     };
-    return Promise.all([RESTAURANT_ANTARES, RESTAURANT_CITY_LIFE].map(getMenu))
+    return Promise.all([RESTAURANT_CITY_LIFE].map(getMenu))
         .then(data => cb(null, data))
         .catch(cb);
 };
