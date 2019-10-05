@@ -1,0 +1,12 @@
+name: CI
+
+on: [push]
+
+jobs:
+  ci:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v1
+    - name: Run test
+      run: bin/antares.sh
