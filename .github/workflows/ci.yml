@@ -3,10 +3,28 @@ name: CI
 on: [push]
 
 jobs:
-  ci:
+  bash:
     runs-on: ubuntu-18.04
     steps:
     - name: Check out code
       uses: actions/checkout@v1
     - name: Run test
       run: bin/antares.sh
+  nodejs:
+    runs-on: ubuntu-18.04
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v1
+    - name: Setup node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 8.16.0
+    - name: Install yarn and run tests
+      env:
+        HIPCHAT_URL: https://httpbin.org/post
+        SLACK_URL: https://httpbin.org/post
+      run: |
+        npm install --global yarn@1.10.1
+        yarn
+        node antaresbot.js
+
