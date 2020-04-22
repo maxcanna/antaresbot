@@ -1,19 +1,17 @@
 {
   "name": "antaresbot",
   "version": "1.0.0",
-  "description": "Fetch and extract text from daily menu",
+  "description": "Post daily menu to several media. E.g. Pushbullet, HipChat, Slack.",
   "main": "antaresbot.js",
   "keywords": [
     "antares",
     "citylife",
     "menu"
   ],
-  "devDependencies": {
-    "@webtask/serverless-webtasks": "^1.0.6"
-  },
   "dependencies": {
     "file-type": "^10.4.0",
     "request": "^2.88.0",
+    "puppeteer": "^2.1.0",
     "request-promise-native": "^1.0.5"
   },
   "repository": "git@github.com:maxcanna/antaresbot.git",
