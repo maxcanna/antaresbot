@@ -15,5 +15,5 @@ $ bin/antares.sh
 ```
 or use the function exported in `antaresbot.js` like:
 ```js
-node -e "require('./antaresbot')().then(process.exit);"
+$ node -e "require('./antaresbot')().then(process.exit);"
 ```
