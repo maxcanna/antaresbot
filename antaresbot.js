@@ -1,5 +1,3 @@
-'use strict';
-
 const FOLDER = '8haeeqygx59lzbsn';
 const OCR_URL = `https://pdftotext.com`;
 const RESTAURANT_CITY_LIFE = 'CITY_LIFE';
@@ -9,20 +7,21 @@ const requestPDF = require('request-promise-native').defaults({ json: true, base
 const requestMessages = require('request-promise-native').defaults({ json: true });
 const requestRestaurant = require('request').defaults({ encoding: null });
 const fileType = require('file-type');
+const puppeteer = require('puppeteer');
 
 const now = new Date();
 const DATE = `${('0'+now.getDate()).slice(-2)}_${(('0'+(now.getMonth()+1)).slice(-2))}_${now.getFullYear()}`;
 
 const RESTAURANT_PARAMETERS = {
     [RESTAURANT_CITY_LIFE]: {
-        pdfUrl: 'http://www.cityliferistorante.it/upload/',
+        url: 'http://www.cityliferistorante.it/upload/',
         name: 'City Life',
         logo: 'http://www.cityliferistorante.it/img/city_logo.png',
     },
     [RESTAURANT_ANTARES]: {
-        pdfUrl: 'http://antaresristorante.it/upload/',
+        url: 'https://antaresristorante.it/#menu',
         name: 'Antares',
-        logo: 'http://antaresristorante.it/images/antares.png',
+        logo: 'https://bit.ly/37vEVoD',
     },
 };
 
@@ -41,8 +40,9 @@ const getFile = url => new Promise((resolve, reject) => requestRestaurant(url, (
 const getFilename = () => `menu_pranzo_${DATE}_16_00`;
 const getRestaurantName = restaurant => RESTAURANT_PARAMETERS[restaurant]['name'];
 const getRestaurantLogo = restaurant => RESTAURANT_PARAMETERS[restaurant]['logo'];
-const getRestaurantFileUrl = restaurant => `${RESTAURANT_PARAMETERS[restaurant]['pdfUrl']}${getFilename()}.pdf`;
-const getShareUrl = pdfUrl => `https://docs.google.com/viewerng/viewer?url=${pdfUrl}&usp=sharing`;
+const getRestaurantUrl = restaurant => `${RESTAURANT_PARAMETERS[restaurant]['url']}`
+const getRestaurantFileUrl = restaurant => `${getRestaurantUrl(restaurant)}${getFilename()}.pdf`;
+const getShareUrl = url => url;
 
 const sendHipchat = (restaurant, text, error = false) => {
     const { env: { HIPCHAT_URL } } = process;
@@ -117,7 +117,8 @@ const sendPushbullet = (restaurant, text, error = false) => {
         : Promise.resolve();
 };
 
-const getMenu = restaurant => {
+const getMenuCityLife = () => {
+    const restaurant = RESTAURANT_CITY_LIFE;
     const FILENAME = getFilename();
     const FILENAME_TXT = `${FILENAME}.txt`;
     const FILENAME_PDF = `${FILENAME}.pdf`;
@@ -137,16 +138,13 @@ const getMenu = restaurant => {
                 id: JOB_ID,
             }
         }))
+        .then(data => requestPDF(`/convert/${FOLDER}/${JOB_ID}`, {
+              qs: {
+                  rnd: '0.16389987427930808'
+              }
+          })
+        )
         .then(data => {
-            console.log(data);
-            return requestPDF(`/convert/${FOLDER}/${JOB_ID}`, {
-                qs: {
-                    rnd: '0.16389987427930808'
-                }
-            })
-        })
-        .then(data => {
-            console.log(data);
             if (data.status !== 'success') {
                 throw new Error('Error during OCR start');
             }
@@ -154,7 +152,6 @@ const getMenu = restaurant => {
         })
         .then(() => requestPDF(`/status/${FOLDER}/${JOB_ID}`))
         .then(data  => {
-            console.log(data);
             if (data.status !== 'success') {
                 throw new Error('Error during OCR status check');
             }
@@ -190,12 +187,29 @@ const getMenu = restaurant => {
         ]));
 };
 
-module.exports = (context, cb) => {
-    process.env = {
-        ...process.env,
-        ...context.secrets,
-    };
-    return Promise.all([RESTAURANT_CITY_LIFE].map(getMenu))
-        .then(data => cb(null, data))
-        .catch(cb);
-};
+const getMenuAntares = () => {
+    const restaurant = RESTAURANT_ANTARES;    
+    
+    return puppeteer.launch({ args: ['--no-sandbox'] })
+      .then(async browser => {
+        const page = await browser.newPage();
+        await page.goto(getRestaurantUrl(restaurant))
+        const text = await page.evaluate(() => jQuery('[role=tabpanel].visibile > ul > li').map((idx, el) => el.innerText).get());
+        return text.join('\n');
+      })
+      .then(text => Promise.all([
+          sendHipchat(restaurant, text),
+          sendSlack(restaurant, text),
+          sendPushbullet(restaurant, text),
+      ]))
+      .catch(e => Promise.all([
+          sendHipchat(restaurant, e.message, true),
+          sendSlack(restaurant, e.message, true),
+          sendPushbullet(restaurant, e.message, true),
+      ]));
+}
+
+module.exports = () => Promise.all([
+          getMenuCityLife(),
+          getMenuAntares()
+        ]);
