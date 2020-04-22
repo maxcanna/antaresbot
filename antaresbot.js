@@ -117,6 +117,15 @@ const sendPushbullet = (restaurant, text, error = false) => {
         : Promise.resolve();
 };
 
+const sendConsole = (restaurant, text, error = false) => {
+    const { env: { CONSOLE_OUTPUT } } = process;
+
+    if (CONSOLE_OUTPUT) {
+        console[error ? 'error' : 'log'](getRestaurantName(restaurant), text)
+    }
+    return Promise.resolve();
+}
+
 const getMenuCityLife = () => {
     const restaurant = RESTAURANT_CITY_LIFE;
     const FILENAME = getFilename();
@@ -184,6 +193,7 @@ const getMenuCityLife = () => {
             sendHipchat(restaurant, e.message, true),
             sendSlack(restaurant, e.message, true),
             sendPushbullet(restaurant, e.message, true),
+            sendConsole(restaurant, e.message, true),
         ]));
 };
 
@@ -206,6 +216,7 @@ const getMenuAntares = () => {
           sendHipchat(restaurant, e.message, true),
           sendSlack(restaurant, e.message, true),
           sendPushbullet(restaurant, e.message, true),
+          sendConsole(restaurant, e.message, true),
       ]));
 }
 

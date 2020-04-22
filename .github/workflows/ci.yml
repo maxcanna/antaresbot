@@ -26,8 +26,9 @@ jobs:
       env:
         HIPCHAT_URL: https://httpbin.org/post
         SLACK_URL: https://httpbin.org/post
+        CONSOLE_OUTPUT: true
       run: |
         npm install --global yarn@1.10.1
         yarn
-        node antaresbot.js
+        node -e "require('./antaresbot')().then(process.exit);"
 
