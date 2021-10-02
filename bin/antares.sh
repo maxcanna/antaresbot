@@ -18,7 +18,7 @@ main() {
         curl -sS https://pdftotext.com/convert/$FOLDER/$JOB_ID?rnd=0.16389987427930808 > /dev/null
         sleep 2s
         TEXT=$(curl -s https://pdftotext.com/files/$FOLDER/$JOB_ID/"${FILENAME%.*}.txt")
-        TEXT=$(echo -en $TEXT | sed -e 's/[[:space:]]*$//;s/^.*PASTA AL POMODORO.//g;s/ € *[0-9]*[0-9],*\.*[0-9][0-9]//g;s/\. */<br>/g')
+        TEXT=$(echo -en $TEXT | sed -e 's/[[:space:]]*$//;s/^.*PASTA AL POMODORO.//g;s/[[:space:]]*€*[[:space:]]*[0-9]*[0-9],*\.*[0-9]*[0-9]*//g;s/\. */<br>/g')
     fi
     rm $FILENAME
 
