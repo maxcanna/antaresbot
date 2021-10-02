@@ -19,7 +19,7 @@ const RESTAURANT_PARAMETERS = {
         logo: 'http://www.cityliferistorante.it/img/city_logo.png',
     },
     [RESTAURANT_ANTARES]: {
-        url: 'https://antaresristorante.it/#menu',
+        url: 'https://antaresristorante.it/menu-del-giorno/',
         name: 'Antares',
         logo: 'https://bit.ly/37vEVoD',
     },
@@ -204,7 +204,7 @@ const getMenuAntares = () => {
       .then(async browser => {
         const page = await browser.newPage();
         await page.goto(getRestaurantUrl(restaurant))
-        const text = await page.evaluate(() => jQuery('[role=tabpanel].visibile > ul > li').map((idx, el) => el.innerText).get());
+        const text = await page.evaluate(() => jQuery('.elementor-image-box-content > ul > li').map((idx, el) => el.innerText).get());
         return text.join('\n');
       })
       .then(text => Promise.all([
