@@ -19,7 +19,7 @@ const RESTAURANT_PARAMETERS = {
         logo: 'http://www.cityliferistorante.it/img/city_logo.png',
     },
     [RESTAURANT_ANTARES]: {
-        url: 'https://antaresristorante.it/#menu',
+        url: 'https://antaresristorante.it/menu-del-giorno/',
         name: 'Antares',
         logo: 'https://bit.ly/37vEVoD',
     },
