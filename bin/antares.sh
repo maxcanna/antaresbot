@@ -55,6 +55,9 @@ main() {
               "channel_tag": "antares"
         }' | curl -X POST https://api.pushbullet.com/v2/pushes -H access-token:$PUSHBULLET_TOKEN -H content-type:application/json -d @-
     fi
+    if [ -n "$CONSOLE_OUTPUT" ]; then
+       echo ${TEXT//<br>/\\n}
+    fi
 }
 
 PDF="http://www.cityliferistorante.it/upload/$FILENAME"
