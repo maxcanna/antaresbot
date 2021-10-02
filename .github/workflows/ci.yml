@@ -12,6 +12,7 @@ jobs:
       env:
         HIPCHAT_URL: https://httpbin.org/post
         SLACK_URL: https://httpbin.org/post
+        CONSOLE_OUTPUT: true
       run: bin/antares.sh
   nodejs:
     runs-on: ubuntu-latest
