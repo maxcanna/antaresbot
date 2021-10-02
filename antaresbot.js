@@ -170,7 +170,7 @@ const getMenuCityLife = () => {
             .replace(/.*PASTA AL POMODORO\.?$/gsm, '')
             .split('\n')
             .filter(Boolean)
-            .filter(row => row.match(/€ *[0-9]*[0-9],*\.*[0-9][0-9]/) === null)
+            .filter(row => row.match(/€.*/) === null)
             .filter(row => row.match(/PRIM.*/) === null)
             .filter(row => row.match(/SECOND.*/) === null)
             .filter(row => row.match(/PIATT.*/) === null)
