@@ -66,8 +66,3 @@ LOGO="http://www.cityliferistorante.it/img/city_logo.png"
 
 main
 
-PDF="http://antaresristorante.it/upload/$FILENAME"
-RESTAURANT="Antares"
-LOGO="http://antaresristorante.it/images/antares.png"
-
-main
