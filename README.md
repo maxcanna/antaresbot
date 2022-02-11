@@ -1,4 +1,3 @@
-![](http://antaresristorante.it/images/antares.png)
 # antaresbot  [![CI Status](https://github.com/maxcanna/antaresbot/workflows/CI/badge.svg)](https://github.com/maxcanna/antaresbot/actions) [![](https://img.shields.io/github/license/maxcanna/antaresbot.svg?maxAge=2592000)](https://github.com/maxcanna/antaresbot/blob/master/LICENSE)
 Post daily menu to several media. E.g. [Pushbullet](https://www.pushbullet.com/channel?tag=antares), HipChat, Slack, `stdout`.
 
