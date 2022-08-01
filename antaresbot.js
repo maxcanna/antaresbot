@@ -6,7 +6,7 @@ const RESTAURANT_ANTARES = 'ANTARES';
 const requestPDF = require('request-promise-native').defaults({ json: true, baseUrl: OCR_URL });
 const requestMessages = require('request-promise-native').defaults({ json: true });
 const requestRestaurant = require('request').defaults({ encoding: null });
-const fileType = require('file-type');
+const { fromBuffer: fileType } = require('file-type');
 const puppeteer = require('puppeteer');
 
 const now = new Date();
@@ -29,12 +29,13 @@ const getFile = url => new Promise((resolve, reject) => requestRestaurant(url, (
     if (err) {
         return reject(err);
     }
-    const dataType = fileType(data);
-
-    if (!dataType || dataType.ext !== 'pdf') {
-        return reject(new Error('Not pdf'));
-    }
-    resolve(data);
+    fileType(data)
+        .then(dataType => {
+            if (!dataType || dataType.ext !== 'pdf') {
+                return reject(new Error('Not pdf'));
+            }
+            resolve(data);
+        });
 }));
 
 const getFilename = () => `menu_pranzo_${DATE}_16_00`;
