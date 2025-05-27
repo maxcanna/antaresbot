@@ -16,5 +16,8 @@
   },
   "repository": "git@github.com:maxcanna/antaresbot.git",
   "author": "Massimiliano Cannarozzo <massi@massi.dev>",
-  "license": "MIT"
+  "license": "MIT",
+  "resolutions": {
+    "debug": "^4.3.5"
+  }
 }
