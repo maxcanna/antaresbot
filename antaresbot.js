@@ -3,11 +3,13 @@ const OCR_URL = `https://pdftotext.com`;
 const RESTAURANT_CITY_LIFE = 'CITY_LIFE';
 const RESTAURANT_ANTARES = 'ANTARES';
 
-const requestPDF = require('request-promise-native').defaults({ json: true, baseUrl: OCR_URL });
-const requestMessages = require('request-promise-native').defaults({ json: true });
-const requestRestaurant = require('request').defaults({ encoding: null });
+const axios = require('axios');
+const FormData = require('form-data');
 const { fromBuffer: fileType } = require('file-type');
 const puppeteer = require('puppeteer');
+
+const axiosPDF = axios.create({ baseURL: OCR_URL, headers: { 'Content-Type': 'application/json' } });
+const axiosMessages = axios.create({ headers: { 'Content-Type': 'application/json' } });
 
 const now = new Date();
 const DATE = `${('0'+now.getDate()).slice(-2)}_${(('0'+(now.getMonth()+1)).slice(-2))}_${now.getFullYear()}`;
@@ -25,18 +27,21 @@ const RESTAURANT_PARAMETERS = {
     },
 };
 
-const getFile = url => new Promise((resolve, reject) => requestRestaurant(url, (err, res, data) => {
-    if (err) {
-        return reject(err);
-    }
-    fileType(data)
-        .then(dataType => {
-            if (!dataType || dataType.ext !== 'pdf') {
-                return reject(new Error('Not pdf'));
-            }
-            resolve(data);
-        });
-}));
+const getFile = url => new Promise((resolve, reject) => {
+    axios.get(url, { responseType: 'arraybuffer' })
+        .then(response => {
+            const data = response.data;
+            fileType(data)
+                .then(dataType => {
+                    if (!dataType || dataType.ext !== 'pdf') {
+                        return reject(new Error('Not pdf'));
+                    }
+                    resolve(data);
+                })
+                .catch(err => reject(err)); // Added catch for fileType promise
+        })
+        .catch(err => reject(err));
+});
 
 const getFilename = () => `menu_pranzo_${DATE}_16_00`;
 const getRestaurantName = restaurant => RESTAURANT_PARAMETERS[restaurant]['name'];
@@ -54,13 +59,11 @@ const sendHipchat = (restaurant, text, error = false) => {
     const HUMAN_DATE = DATE.replace(/_/g, '/');
 
     return HIPCHAT_URL
-        ? requestMessages.post(HIPCHAT_URL, {
-            body: {
-                color: error ? 'red' : 'green',
-                message: `<a href=${SHARE_URL}><img src=${LOGO}><br><br>Menu ${NAME} del <b>${HUMAN_DATE}</b></a><br><br>${text.replace('\n', '<br>')}`,
-                notify: true,
-                message_format: 'html',
-            }
+        ? axiosMessages.post(HIPCHAT_URL, {
+            color: error ? 'red' : 'green',
+            message: `<a href=${SHARE_URL}><img src=${LOGO}><br><br>Menu ${NAME} del <b>${HUMAN_DATE}</b></a><br><br>${text.replace('\n', '<br>')}`,
+            notify: true,
+            message_format: 'html',
         })
         : Promise.resolve();
 };
@@ -74,25 +77,26 @@ const sendSlack = (restaurant, text, error = false) => {
     const HUMAN_DATE = DATE.replace(/_/g, '/');
 
     return SLACK_URL
-        ? requestMessages.post(SLACK_URL, {
-            body: {
-                username: NAME,
-                icon_url: LOGO,
-                attachments: [
-                    {
-                        text,
-                        fallback: `Menu del ${HUMAN_DATE}`,
-                        title: `Menu del ${HUMAN_DATE}`,
-                        title_link: SHARE_URL,
-                        color: error ? 'danger' : 'good',
-                        thumb_url: LOGO,
-                        author_icon: LOGO,
-                        author_name: NAME,
-                    }
-                ]
-            }
+        ? axiosMessages.post(SLACK_URL, {
+            username: NAME,
+            icon_url: LOGO,
+            attachments: [
+                {
+                    text,
+                    fallback: `Menu del ${HUMAN_DATE}`,
+                    title: `Menu del ${HUMAN_DATE}`,
+                    title_link: SHARE_URL,
+                    color: error ? 'danger' : 'good',
+                    thumb_url: LOGO,
+                    author_icon: LOGO,
+                    author_name: NAME,
+                }
+            ]
         })
         : Promise.resolve();
+// The previous block already included the attachments, so this search block is no longer necessary.
+// I will remove it in the next step if it causes issues.
+// For now, I'll assume it's handled.
 };
 
 const sendPushbullet = (restaurant, text, error = false) => {
@@ -103,14 +107,13 @@ const sendPushbullet = (restaurant, text, error = false) => {
     const HUMAN_DATE = DATE.replace(/_/g, '/');
 
     return PUSHBULLET_TOKEN
-        ? requestMessages.post('https://api.pushbullet.com/v2/pushes', {
-            body: {
-                type: 'link',
-                body: text,
-                title: `Menu ${NAME} del ${HUMAN_DATE}`,
-                url: SHARE_URL,
-                channel_tag: 'antares'
-            },
+        ? axiosMessages.post('https://api.pushbullet.com/v2/pushes', {
+            type: 'link',
+            body: text,
+            title: `Menu ${NAME} del ${HUMAN_DATE}`,
+            url: SHARE_URL,
+            channel_tag: 'antares'
+        }, {
             headers: {
                 'access-token': PUSHBULLET_TOKEN,
             }
@@ -136,38 +139,31 @@ const getMenuCityLife = () => {
     const JOB_ID = Math.random().toString(16).substring(5);
 
     return getFile(PDF_URL)
-        .then(file => requestPDF.post(`/upload/${FOLDER}`, {
-            formData: {
-                file: {
-                    value: file,
-                    options: {
-                        filename: FILENAME_PDF,
-                        contentType: 'application/pdf'
-                    }
-                },
-                id: JOB_ID,
+        .then(file => {
+            const form = new FormData();
+            form.append('file', file, { filename: FILENAME_PDF, contentType: 'application/pdf' });
+            form.append('id', JOB_ID);
+            return axiosPDF.post(`/upload/${FOLDER}`, form, { headers: form.getHeaders() });
+        })
+        .then(response => axiosPDF.get(`/convert/${FOLDER}/${JOB_ID}`, {
+            params: {
+                rnd: '0.16389987427930808'
             }
         }))
-        .then(data => requestPDF(`/convert/${FOLDER}/${JOB_ID}`, {
-              qs: {
-                  rnd: '0.16389987427930808'
-              }
-          })
-        )
-        .then(data => {
-            if (data.status !== 'success') {
+        .then(response => {
+            if (response.data.status !== 'success') {
                 throw new Error('Error during OCR start');
             }
             return new Promise(resolve => setTimeout(resolve, 2000));
         })
-        .then(() => requestPDF(`/status/${FOLDER}/${JOB_ID}`))
-        .then(data  => {
-            if (data.status !== 'success') {
+        .then(() => axiosPDF.get(`/status/${FOLDER}/${JOB_ID}`))
+        .then(response => {
+            if (response.data.status !== 'success') {
                 throw new Error('Error during OCR status check');
             }
-            return requestPDF(`/files/${FOLDER}/${JOB_ID}/${FILENAME_TXT}`)
+            return axiosPDF.get(`/files/${FOLDER}/${JOB_ID}/${FILENAME_TXT}`);
         })
-        .then(text => text
+        .then(response => response.data
             .replace(/.*PASTA AL POMODORO\.?$/gsm, '')
             .split('\n')
             .filter(Boolean)
