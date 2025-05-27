@@ -22,7 +22,7 @@ jobs:
     - name: Setup node
       uses: actions/setup-node@v1
       with:
-        node-version: 14.18.0
+        node-version: 20
     - name: Install yarn and run tests
       env:
         HIPCHAT_URL: https://httpbin.org/post
@@ -31,5 +31,5 @@ jobs:
       run: |
         npm install --global yarn@1.10.1
         yarn
-        node -e "require('./antaresbot')().then(process.exit);"
+        node -e "require('./antaresbot')().then(() => process.exit(0)).catch(() => process.exit(1));"
 
