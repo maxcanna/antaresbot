@@ -12,7 +12,7 @@
     "file-type": "^21.0.0",
     "axios": "^1.0.0",
     "puppeteer": "^24.9.0",
-    "form-data": "^4.0.0"
+    "form-data": "^4.0.4"
   },
   "repository": "git@github.com:maxcanna/antaresbot.git",
   "author": "Massimiliano Cannarozzo <massi@massi.dev>",
