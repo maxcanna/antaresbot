@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v4
     - name: Run test
       env:
         HIPCHAT_URL: https://httpbin.org/post
@@ -18,18 +18,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Check out code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v4
     - name: Setup node
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version: 22
     - name: Install yarn and run tests
       env:
         HIPCHAT_URL: https://httpbin.org/post
         SLACK_URL: https://httpbin.org/post
         CONSOLE_OUTPUT: true
       run: |
-        npm install --global yarn@1.10.1
-        yarn
-        node -e "require('./antaresbot')().then(() => process.exit(0)).catch(() => process.exit(1));"
-
+        corepack enable
+        yarn config set enableGlobalCache true
+        yarn install --immutable
+        node --loader ./.pnp.loader.mjs -r ./.pnp.cjs -e "require('./antaresbot')().then(() => process.exit(0)).catch(() => process.exit(1));"
