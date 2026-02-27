@@ -5,7 +5,7 @@ const RESTAURANT_ANTARES = 'ANTARES';
 
 const axios = require('axios');
 const FormData = require('form-data');
-const { fromBuffer: fileType } = require('file-type');
+const fileTypePromise = import('file-type').then(m => m.fileTypeFromBuffer);
 const puppeteer = require('puppeteer');
 
 const axiosPDF = axios.create({ baseURL: OCR_URL, headers: { 'Content-Type': 'application/json' } });
@@ -29,8 +29,9 @@ const RESTAURANT_PARAMETERS = {
 
 const getFile = url => new Promise((resolve, reject) => {
     axios.get(url, { responseType: 'arraybuffer' })
-        .then(response => {
+        .then(async response => {
             const data = response.data;
+            const fileType = await fileTypePromise;
             fileType(data)
                 .then(dataType => {
                     if (!dataType || dataType.ext !== 'pdf') {
